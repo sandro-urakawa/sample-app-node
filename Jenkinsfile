@@ -18,6 +18,11 @@ spec:
   # Use service account that can deploy to all namespaces
   serviceAccountName: jenkins-master
   containers:
+  - name: kubectl 
+    image: bitnami/kubectl:latest 
+    command:
+    - cat
+    tty: true
   - name: docker
     image: docker:latest
     command:
@@ -43,7 +48,6 @@ spec:
         }
         stage('Build Image') { 
             steps { 
-                sh "ls"
                 container('docker') {
 		    script {
 		        dockerImage = docker.build registry + "/mendix-jenkins:$BUILD_NUMBER"
@@ -73,13 +77,11 @@ spec:
             }
         }
         stage('Deploy App') {
-            agent { label 'master'}
             steps {
-                git branch: 'master',
-                    credentialsId: 'sandro.urakawa-github',
-                    url: 'https://github.com/sandro-urakawa/sample-app-node.git'
-                withKubeConfig([credentialsId: '49fcd727-beb7-4846-bbec-20633ba43332', serverUrl: 'https://kubernetes.default']) {
-                    sh 'kubectl apply -f sample-node-app.yaml'
+                container('kubectl') {
+                    withKubeConfig([credentialsId: '49fcd727-beb7-4846-bbec-20633ba43332', serverUrl: 'https://kubernetes.default']) {
+                        sh 'kubectl apply -f sample-node-app.yaml'
+                    }
                 }
             }
         }
