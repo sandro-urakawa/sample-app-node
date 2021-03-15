@@ -20,7 +20,7 @@ spec:
         image: 251815888428.dkr.ecr.us-east-1.amazonaws.com/mendix-jenkins:latest 
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service 
