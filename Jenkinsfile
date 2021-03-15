@@ -75,6 +75,9 @@ spec:
         stage('Deploy App') {
             agent { label 'master'}
             steps {
+                git branch: 'master',
+                    credentialsId: 'sandro.urakawa-github',
+                    url: 'https://github.com/sandro-urakawa/sample-app-node.git'
                 script {
                    kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
                 }
