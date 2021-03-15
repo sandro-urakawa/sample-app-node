@@ -50,15 +50,6 @@ spec:
                 }
             }
         }
-        stage('Verify Image') { 
-            steps { 
-                container('docker') {
-                    sh """
-                        docker images
-                    """
-                }
-            }
-        }
         stage('Push Image') { 
             steps {
 	        container('docker') {
@@ -76,6 +67,15 @@ spec:
                 container('docker') {
                     withKubeConfig([credentialsId: 'jenkins-robot', serverUrl: 'https://kubernetes.default']) {
                         sh 'kubectl apply -f node-app.yaml'
+                    }
+                }
+            }
+        }
+        stage('Verify service Load Balancer') {
+            steps {
+                container('docker') {
+                    withKubeConfig([credentialsId: 'jenkins-robot', serverUrl: 'https://kubernetes.default']) {
+                        sh 'kubectl get service node-app-svc -n app-node'
                     }
                 }
             }
