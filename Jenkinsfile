@@ -74,7 +74,7 @@ spec:
         stage('Deploy App') {
             steps {
                 container('docker') {
-                    withKubeConfig([credentialsId: '49fcd727-beb7-4846-bbec-20633ba43332', serverUrl: 'https://kubernetes.default']) {
+                    withKubeConfig([credentialsId: 'jenkins-robot', serverUrl: 'https://kubernetes.default']) {
                         sh 'kubectl apply -f sample-node-app.yaml'
                     }
                 }
