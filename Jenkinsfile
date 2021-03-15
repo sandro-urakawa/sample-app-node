@@ -1,27 +1,82 @@
 pipeline {
-    agent any
-
+    environment {	
+        registry = '251815888428.dkr.ecr.us-east-1.amazonaws.com'
+        registryCredential = 'aws-credentials'
+        dockerImage = ''
+    }
+    agent {
+        kubernetes {
+            label 'spring-petclinic-demo'
+            defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+labels:
+  component: ci
+spec:
+  # Use service account that can deploy to all namespaces
+  serviceAccountName: jenkins-master
+  containers:
+  - name: docker
+    image: docker:latest
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-sock
+  volumes:
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
+"""
+        }
+    }
     stages {
-        stage('Build') {
-            node {
-                docker.withRegistry('https://registry.svc.intranet', '23a968ea-d3e4-4089-a349-c1c28d21c67d') {
-                    def customImage = docker.build("registry.svc.intranet:app-node-jenkins:${env.BUILD_ID}")
-                    /* Push the container to the custom Registry */
-                    customImage.push()
+        stage('Cloning Git') {
+            steps {
+                git branch: 'master',
+                    credentialsId: 'sandro.urakawa-github',
+                    url: 'https://github.com/sandro-urakawa/sample-app-node.git'
+            }
+        }
+        stage('Build Image') { 
+            steps { 
+                sh "ls"
+                container('docker') {
+		    script {
+		        dockerImage = docker.build registry + "/mendix-jenkins:$BUILD_NUMBER"
+		    }
                 }
             }
-            steps {
-                echo 'Building..'
+        }
+        stage('Verify Image') { 
+            steps { 
+                container('docker') {
+                    sh """
+                        docker images
+                    """
+                }
             }
         }
-        stage('Test') {
+        stage('Push Image') { 
             steps {
-                echo 'Testing..'
+	        container('docker') {
+		    script{
+		        docker.withRegistry("https://" + registry, "ecr:us-east-1:" + registryCredential) {
+                            dockerImage.push("latest")
+                            dockerImage.push($BUILD_NUMBER)
+                        }
+                    }
+                }
             }
         }
-        stage('Deploy') {
+        stage('Deploy App') {
             steps {
-                echo 'Deploying....'
+                script {
+                   kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
+                }
             }
         }
     }
