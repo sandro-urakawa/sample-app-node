@@ -74,8 +74,10 @@ spec:
         }
         stage('Deploy App') {
             steps {
-                script {
-                   kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
+                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                    script {
+                       kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
+                    }
                 }
             }
         }
