@@ -18,13 +18,8 @@ spec:
   # Use service account that can deploy to all namespaces
   serviceAccountName: jenkins-master
   containers:
-  - name: kubectl 
-    image: bitnami/kubectl:latest 
-    command:
-    - cat
-    tty: true
   - name: docker
-    image: docker:latest
+    image: 251815888428.dkr.ecr.us-east-1.amazonaws.com/mendix-jenkins:docker-kubectl
     command:
     - cat
     tty: true
@@ -78,7 +73,7 @@ spec:
         }
         stage('Deploy App') {
             steps {
-                container('kubectl') {
+                container('docker') {
                     withKubeConfig([credentialsId: '49fcd727-beb7-4846-bbec-20633ba43332', serverUrl: 'https://kubernetes.default']) {
                         sh 'kubectl apply -f sample-node-app.yaml'
                     }
