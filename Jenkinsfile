@@ -75,7 +75,7 @@ spec:
             steps {
                 container('docker') {
                     withKubeConfig([credentialsId: 'jenkins-robot', serverUrl: 'https://kubernetes.default']) {
-                        sh 'kubectl apply -f sample-node-app.yaml'
+                        sh 'kubectl apply -f node-app.yaml'
                     }
                 }
             }

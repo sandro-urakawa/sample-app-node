@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sample-node-app 
-  namespace: jenkins
+  name: node-app 
+  namespace: app-node 
 spec:
   replicas: 1 
   selector:
     matchLabels:
-      app: sample-node-app 
+      app: node-app 
   template:
     metadata:
-      name: sample-node-app 
+      name: node-app 
       labels:
-        app: sample-node-app 
+        app: node-app 
     spec:
       containers:
-      - name: sample-node-app 
+      - name: node-app 
         image: 251815888428.dkr.ecr.us-east-1.amazonaws.com/mendix-jenkins:latest 
         imagePullPolicy: Always
         ports:
@@ -25,12 +25,13 @@ spec:
 apiVersion: v1
 kind: Service 
 metadata:
-  name: sample-node-app-svc
+  name: node-app-svc
+  namespace: app-node 
   labels:
-    app: sample-node-app
+    app: node-app
 spec:
   selector:
-    app: sample-node-app
+    app: node-app
   type: LoadBalancer
   ports:
     - port: 80
