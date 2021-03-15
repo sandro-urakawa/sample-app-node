@@ -6,7 +6,7 @@ pipeline {
     }
     agent {
         kubernetes {
-            label 'spring-petclinic-demo'
+            label 'jenkins-slave'
             defaultContainer 'jnlp'
             yaml """
 apiVersion: v1
@@ -73,11 +73,10 @@ spec:
             }
         }
         stage('Deploy App') {
+            agent { label 'master'}
             steps {
-                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
-                    script {
-                       kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
-                    }
+                script {
+                   kubernetesDeploy(configs: "sample-node-app.yaml", kubeconfigId: "mykubeconfig")
                 }
             }
         }
